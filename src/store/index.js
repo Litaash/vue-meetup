@@ -7,20 +7,20 @@ Vue.use(Vuex)
 export const store = new Vuex.Store({
   state: {
     loadedMeetups: [
-      { imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/47/New_york_times_square-terabass.jpg',
-        id: '234',
-        title: 'Meetup in New York',
-        date: new Date(),
-        location: 'New York',
-        description: 'Its New York'
-      },
-      { imageUrl: 'https://cdn.berlinocacioepepemagazine.com/wp-content/uploads/2018/06/berlin-cathedral-212263_960_720.jpg',
-        id: '235',
-        title: 'Meetup in Berlin',
-        date: new Date(),
-        location: 'Berlin',
-        description: 'Its Berlin'
-      }
+      // { imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/47/New_york_times_square-terabass.jpg',
+      //   id: '234',
+      //   title: 'Meetup in New York',
+      //   date: new Date(),
+      //   location: 'New York',
+      //   description: 'Its New York'
+      // },
+      // { imageUrl: 'https://cdn.berlinocacioepepemagazine.com/wp-content/uploads/2018/06/berlin-cathedral-212263_960_720.jpg',
+      //   id: '235',
+      //   title: 'Meetup in Berlin',
+      //   date: new Date(),
+      //   location: 'Berlin',
+      //   description: 'Its Berlin'
+      // }
     ],
     user: null,
     loading: false,
@@ -32,6 +32,20 @@ export const store = new Vuex.Store({
     },
     createMeetup (state, payload) {
       state.loadedMeetups.push(payload)
+    },
+    updateMeetupData (state, payload) {
+      const meetup = state.loadedMeetups.find(meetup => {
+        return meetup.id === payload.id
+      })
+      if (payload.title) {
+        meetup.title = payload.title
+      }
+      if (payload.description) {
+        meetup.description = payload.description
+      }
+      if (payload.date) {
+        meetup.date = payload.date
+      }
     },
     setUser (state, payload) {
       state.user = payload
@@ -60,6 +74,7 @@ export const store = new Vuex.Store({
               description: obj[key].description,
               imageUrl: obj[key].imageUrl,
               date: obj[key].date,
+              location: obj[key].location,
               creatorId: obj[key].creatorId
             })
           }
@@ -103,6 +118,30 @@ export const store = new Vuex.Store({
             imageUrl: imageUrl,
             id: key
           })
+        })
+    },
+    updateMeetupData ({commit}, payload) {
+      commit('setLoading', true)
+      const updateObj = {
+
+      }
+      if (payload.title) {
+        updateObj.title = payload.title
+      }
+      if (payload.description) {
+        updateObj.description = payload.description
+      }
+      if (payload.date) {
+        updateObj.date = payload.date
+      }
+      firebase.database().ref('meetups').child(payload.id).update(updateObj)
+        .then(() => {
+          commit('setLoading', false)
+          commit('updateMeetupData', payload)
+        })
+        .catch(error => {
+          console.log(error)
+          commit('setLoading', false)
         })
     },
     singUserUp ({commit}, payload) {
